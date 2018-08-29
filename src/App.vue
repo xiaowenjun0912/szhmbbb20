@@ -39,45 +39,26 @@
                         </span>
                         <span>
                             <a href="" class="">
-                                <font style="vertical-align: inherit;">
-                                    <font style="vertical-align: inherit;">中心会员</font>
-                                </font>
+                                    会员中心
                             </a>
                             <strong>
-                                <font style="vertical-align: inherit;">
-                                    <font style="vertical-align: inherit;">| </font>
-                                </font>
+                                        |
                             </strong>
                             <a>
-                                <font style="vertical-align: inherit;">
-                                    <font style="vertical-align: inherit;">退出</font>
-                                </font>
+                                        退出
                             </a>
                             <strong>
-                                <font style="vertical-align: inherit;">
-                                    <font style="vertical-align: inherit;">|</font>
-                                </font>
+                                        |
                             </strong>
                         </span>
-                        <a href="" class="">
-                            <i class="iconfont icon-cart"></i>
-                            <font style="vertical-align: inherit;">
-                                <font style="vertical-align: inherit;">购物车（
-                                </font>
-                                <span id="shoppingCartCount">
-                                    <span>
-                                        <font style="vertical-align: inherit;">4</font>
-                                    </span>
-                                </span>
-                                <font style="vertical-align: inherit;">）</font>
-                            </font>
-                            <span id="shoppingCartCount">
-                                <span>
-                                    <font style="vertical-align: inherit;"></font>
-                                </span>
-                            </span>
-                            <font style="vertical-align: inherit;"></font>
-                        </a>
+                        <!-- <a href="" class=""> -->
+                            <router-link to="/cart">
+                                <i class="iconfont icon-cart"></i>购物车（
+                                    <span id="shoppingCartCount">
+                                        <span>{{$store.getters.goodsCount}}</span>
+                                    )</span>
+                            </router-link>
+                                <!-- </a> -->
                     </div>
                 </div>
             </div>

@@ -158,12 +158,15 @@
                                 <ul class="side-img-list">
                                     <li v-for="(item, index) in hotgoodslist" :key="item.id">
                                         <div class="img-box">
-                                            <a href="#/site/goodsinfo/90" class="">
+                                            <!-- <a href="#/site/goodsinfo/90" class=""> -->
+                                            <router-link :to="'/detail/'+item.id">
                                                 <img :src="item.img_url">
-                                            </a>
+                                            </router-link>
+                                            <!-- </a> -->
                                         </div>
                                         <div class="txt-box">
-                                            <a href="#/site/goodsinfo/90" class="">{{item.title}}</a>
+                                            <!-- <a href="#/site/goodsinfo/90" class="">{{item.title}}</a> -->
+                                            <router-link :to="'/detail/'+item.id">{{item.title}}</router-link>
                                             <span>{{item.add_time | filterDate}}</span>
                                         </div>
                                     </li>
@@ -330,20 +333,27 @@ export default {
             },
             // 使用jquery来加入购物车
             cartAdd(){
+                //为0提示
+                if(this.buyCount==0){
+                    this.$Message.error("请多买点东西");
+                    return;
+                }
+
                 // 获取加入购物车位置
                 let cartOffset = $('.add').offset();
-                console.log(cartOffset);
+                // console.log(cartOffset);
                 // 获取购物车的位置
                 let targetOffset =$('.icon-cart').offset();
-                console.log(targetOffset);
+                // console.log(targetOffset);
                 // 使用动画的方式 移动图片
                 // 移动到按钮位置显示出来 动画移动到目标位置
-                $(".moveImg").show().css(cartOffset).animate(targetOffset,function(){
-                    $(this).hide();
+                $(".moveImg").stop().show().addClass('move').css(cartOffset).animate(targetOffset,2000,function(){
+                    $(this).hide().removeClass('move');
                 });
                 // 动画完结以后
                 // 隐藏图片
                 // 增加购物车中的显示内容
+                this.$store.commit("addGoods",{goodId:this.productId,goodNum:this.buyCount})
             },
 
     },
@@ -355,6 +365,21 @@ export default {
     // 获取评论
     this.getComments();
     },
+      // 观察数据改变
+    watch: {
+        $route(val, oldVal) {
+        //   console.log(val);
+        //   console.log(oldVal);
+        //   console.log('改变啦');
+        // 认为让他 强制生成 v-if 数组长度
+        // 数组长度为0 直接销毁
+        this.images.normal_size = [];
+
+        // 重新调用接口 获取数据 渲染页面
+        // 回调函数中重新复制 再次 生成
+        this.getProductDetail();
+        }
+    }
    
 
     
@@ -403,13 +428,14 @@ export default {
 .moveImg {
   position: absolute;
   width: 50px;
-  display: none;
+//   display: none;
   // top:0;
   // left:0;
 }
-.moveImg.move{
-    transition: all 1s;
-    transform: rotate(720deg);
+.moveImg.move {
+  transition: transform 1s, opacity 1s;
+  opacity: 0.5;
+  transform: scale(1) rotate(7200deg);
 }
 </style>
 
