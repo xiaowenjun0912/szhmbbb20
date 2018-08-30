@@ -15,36 +15,31 @@
                         <a target="_blank" href="#"></a>
                     </div>
                     <div id="menu" class="right-box">
-                        <span style="display: none;">
-                            <a href="" class="">
-                                <font style="vertical-align: inherit;">
-                                    <font style="vertical-align: inherit;">登录</font>
-                                </font>
-                            </a>
+                        <!-- 没有登录 -->
+                        <span v-show="$store.state.isLogin==false">
+                          
+                            <router-link to="/login">
+                            登录
+                            </router-link>
                             <strong>
-                                <font style="vertical-align: inherit;">
-                                    <font style="vertical-align: inherit;">| </font>
-                                </font>
+                               |
                             </strong>
                             <a href="" class="">
-                                <font style="vertical-align: inherit;">
-                                    <font style="vertical-align: inherit;">注册</font>
-                                </font>
+                               注册
                             </a>
                             <strong>
-                                <font style="vertical-align: inherit;">
-                                    <font style="vertical-align: inherit;">|</font>
-                                </font>
+                                |
                             </strong>
                         </span>
-                        <span>
+                        <!-- 已经登录 -->
+                        <span v-show="$store.state.isLogin==true">
                             <a href="" class="">
                                     会员中心
                             </a>
                             <strong>
                                         |
                             </strong>
-                            <a>
+                            <a @click="loginout">
                                         退出
                             </a>
                             <strong>
@@ -173,9 +168,26 @@
                 </div>
             </div>
         </div>
-
+   <!-- 弹出的 那个 模态框 -->
+    <Modal v-model="isShow" width="360">
+      <p slot="header" style="color:#f60;text-align:center">
+        <Icon type="ios-information-circle"></Icon>
+        <span>你真的要离开?(╥╯^╰╥)</span>
+      </p>
+      <div style="text-align:center">
+        <p>登出了之后,只有重新登录才能够回来啦,你确定你记得密码?</p>
+      </div>
+      <div slot="footer" style="display:flex;justify-content: center">
+        <Button type="success" size="large"   @click="sureExit">确认</Button>
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        <Button type="error" size="large"   @click="isShow=false">取消</Button>
+      </div>
+    </Modal>
     </div>
-
 </template>
 
 <script>
@@ -183,7 +195,55 @@ import $ from "jquery";
 export default {
     //修改之后devtool插件的控制台中 会有不同的名字 更加利于查找元素
     //传送门 //http://cn.vuejs
-    name: "container"
+    name: "container",
+    data: function() {
+        return {
+        isShow: false
+        };
+    },
+    methods:{
+        loginout(){
+                  // 根据模态框的提示 决定是否调用接口
+                    this.isShow = true;
+        },
+          // 取消登出的逻辑
+    sureExit() {
+      // 关闭模态框
+      this.isShow = false;
+      // 调用接口
+      // 调用登出接口
+      // 登出成功之后 修改 Vuex的数据
+      this.$axios.get("site/account/logout").then(response => {
+        // 登出成功之后  修改 Vuex的状态为false
+        if (response.data.status == 0) {
+            this.$message.error('大哥你好,退出成功');
+          // 登出成功
+          // 修改状态
+          this.$store.commit("changeLoginStatus", false);
+          // console.log(response);
+          // 能不能获取到当前所处的路由
+          // 可以通过 this.$route 获取到 当前的路由地址 进而判断是否为订单页
+          // 但是这么做不合理 因为后期还有 很多需要登陆的页面 如果写死判断 后期需要频繁的调整这里的逻辑
+          // 直接一劳永逸 去 首页 或者是登录页
+          // console.log(this.$router);
+          // console.log( this.$route);
+          this.$router.push('/index');
+        }
+      });
+    },
+        // loginout(){
+        //     this.$axios.get("/site/account/logout").then(response=>{
+        //         // 退出成功之后修改vuex的状态为false
+        //        if(response.data.status==0){
+        //             // 修改Vuex中的数据
+        //             // 提交载荷
+        //             this.$message.error('大哥你好,你退出成功');
+        //             this.$store.commit('changeLoginStatus',false);
+
+        //         }
+        //     })
+        // }
+    }
 };
 //插件的代码 为a标签增加两个用于动画的span
 // 插件的代码 为a标签增加两个用于动画的span

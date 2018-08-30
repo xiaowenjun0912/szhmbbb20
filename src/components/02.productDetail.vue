@@ -188,8 +188,6 @@
 </template>
 
 <script>
-// 导入axios
-import axios from 'axios';
 
 // 导入jq
 import $ from "jquery";
@@ -251,9 +249,9 @@ export default {
                 this.productId = this.$route.params.id;
                 // ajax获取数据
                 // 数据回来之后渲染到页面上
-                axios
+                this.$axios
                 .get(
-                    `http://47.106.148.205:8899/site/goods/getgoodsinfo/${this.productId}`)
+                    `/site/goods/getgoodsinfo/${this.productId}`)
                 .then(response=>{
                     console.log(response);
                     this.goodsinfo = response.data.message.goodsinfo;
@@ -277,9 +275,9 @@ export default {
 
               //获取评论的方法
         getComments() {
-        axios
+        this.$axios
             .get(
-            `http://47.106.148.205:8899/site/comment/getbypage/goods/${this.productId}?pageIndex=${this.pageNum}&pageSize=${this.pageSize}`)
+            `/site/comment/getbypage/goods/${this.productId}?pageIndex=${this.pageNum}&pageSize=${this.pageSize}`)
             .then(response => {
             // console.log(response);
             this.comments = response.data.message;
@@ -313,7 +311,7 @@ export default {
                     return;
                 }
                 //调用接口
-                axios.post(`http://47.106.148.205:8899/site/validate/comment/post/goods/${
+                this.$axios.post(`/site/validate/comment/post/goods/${
                     this.productId
                     }`,
                     {
@@ -353,7 +351,7 @@ export default {
                 // 动画完结以后
                 // 隐藏图片
                 // 增加购物车中的显示内容
-                this.$store.commit("addGoods",{goodId:this.productId,goodNum:this.buyCount})
+                this.$store.commit("addGoods",{goodId:this.productId,goodNum:this.buyCount});
             },
 
     },

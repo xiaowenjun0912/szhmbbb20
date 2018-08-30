@@ -14,57 +14,108 @@ import Index from './components/01.index.vue';
 import Detail from './components/02.productDetail.vue';
 
 // 导入购物车的组件页面
-import shoppingCart from './components/03.shoppingCart.vue';
+import ShoppingCart from './components/03.shoppingCart.vue';
+
+// 导入登录页面的组件
+import Login from './components/04.login.vue';
+
+// 导入填写订单页面的组件
+import FillOrder from './components/05.fillOrder.vue';
+
+// 导入 elementui
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
+// 记得要use一下 才会把Elementui中的内容注册到Vue上面
+Vue.use(ElementUI);
+
+// 导入iView
+import iView from 'iview';
+import 'iview/dist/styles/iview.css';
+// 记得use一下
+Vue.use(iView);
+
+// 全局导入axios
+import axios from 'axios';
+// 配置全局基地址(所有跟插件 框架相关的设置 去对应的文档找)
+// 一般来说接口 是在一台服务器上的 一系列地址
+// 抽取出来还有一个好处 如果服务器更换地址 只需要调整一个位置
+axios.defaults.baseURL = 'http://47.106.148.205:8899';
+//让ajax携带cookie
+// 跨域请求时 是否会携带 凭证(cookie)
+axios.defaults.withCredentials = true;
+// 增加到Vue的原型中 学习了 iView this.$Message
+Vue.prototype.$axios = axios;
+
+// 导入放大镜
+import ProductZoomer from 'vue-product-zoomer';
+Vue.use(ProductZoomer);
+
+// 注册VueRouter(类似于Express的中间件语法)
+// 传送门:https://router.vuejs.org/zh/guide/#html JavaScript分类的第0行
+Vue.use(VueRouter);
 
 
-// 整合Vuex 统一进行数据管理
-import Vuex from 'vuex'
-Vue.use(Vuex)
+
 
 //实例化一个仓库 用来保存数据
 // 实例化Vue的时候 也需要传入 仓库对象
+// 整合 Vuex 统一进行数据管理
+import Vuex from 'vuex'
+Vue.use(Vuex)
 const store = new Vuex.Store({
 //   // 这里就是我们的数据
   state:{
     // count:998
-    cartDate: JSON.parse(window.localStorage.getItem('goodKey'))||{}
+    cartDate: JSON.parse(window.localStorage.getItem('goodKey'))||{},
+    // 是否已经登录
+    isLogin:false,
+    // 记录登录之前的网址
+    fromPath:"",
   },
   // 这个是暴露的修改方法
   mutations:{
     //  increment (state){
     //  state.count++
     //  }
-    addGoods(state,goodInfo){
-      // console.log(goodInfo);
-      if(state.cartDate[goodInfo.goodId]==undefined){
-        // 传过来的id 不存在新增的这个id作为属性
-        // 直接增加这个属性即可
-        state.cartDate[goodInfo.goodId]=goodInfo.goodNum;
-        // 为了要让vue检测到数据的改变同步修改页面显示 需要调用Vue.set方法
-        Vue.set(state.cartDate,goodInfo.goodId,goodInfo.goodNum);
-      }else{
-        // 传过来的id已经存在累加
-        state.cartDate[goodInfo.goodId]+=goodInfo.goodNum;
+      addGoods(state,goodInfo){
+        // console.log(goodInfo);
+        if(state.cartDate[goodInfo.goodId]==undefined){
+          // 传过来的id 不存在新增的这个id作为属性
+          // 直接增加这个属性即可
+          state.cartDate[goodInfo.goodId]=goodInfo.goodNum;
+          // 为了要让vue检测到数据的改变同步修改页面显示 需要调用Vue.set方法
+          Vue.set(state.cartDate,goodInfo.goodId,goodInfo.goodNum);
+        }else{
+          // 传过来的id已经存在累加
+          state.cartDate[goodInfo.goodId]+=goodInfo.goodNum;
 
-      }
-    },
-     // 额外的增加一个修改的方法
-    // 逻辑是 直接把传入的 数量 替换掉 默认的数量
-    // 格式约定 格式{goodId:商品id,goodNum:数量}
-    updateGoodsNum(state,goodInfo){
-      // 直接替换即可
-      state.cartDate[goodInfo.goodId] = goodInfo.goodNum;
-    },
-    // 额外的增加一个删除的方法
-    // goodId就是 商品的id
-    deleteGoods(state,goodId){
-      // 如何删除对象中的属性
-      // delete 删除对象中的属性
-      // delete state.cartDate[goodId];
-      // delete 删除的属性不会触发视图更新
-      // 需要调用Vue.delete方法才可以
-      Vue.delete(state.cartDate,goodId);
-    },
+        }
+      },
+      // 额外的增加一个修改的方法
+      // 逻辑是 直接把传入的 数量 替换掉 默认的数量
+      // 格式约定 格式{goodId:商品id,goodNum:数量}
+      updateGoodsNum(state,goodInfo){
+        // 直接替换即可
+        state.cartDate[goodInfo.goodId] = goodInfo.goodNum;
+      },
+      // 额外的增加一个删除的方法
+      // goodId就是 商品的id
+      deleteGoods(state,goodId){
+        // 如何删除对象中的属性
+        // delete 删除对象中的属性
+        // delete state.cartDate[goodId];
+        // delete 删除的属性不会触发视图更新
+        // 需要调用Vue.delete方法才可以
+        Vue.delete(state.cartDate,goodId);
+      },
+      // 切换登录状态
+      changeLoginStatus(state,isLogin){
+        state.isLogin=isLogin;
+      },
+        // 增加一个保存来时地址的方法
+    saveFromPath(state,fromPath){
+      state.fromPath = fromPath;
+    }
     },
     // getters vuex的计算属性
     getters:{
@@ -90,10 +141,7 @@ window.onbeforeunload=function(){
 //注册VueRouter(类似于Express的中间件语法)
 Vue.use(VueRouter);
 
-// 导入element-ui 
-import ElementUI from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css';
-Vue.use(ElementUI);
+
 
 //导入懒加载vue插件
 import Vuelazyload from 'vue-lazyload'
@@ -111,14 +159,9 @@ Vue.use(Vuelazyload,{
           return moment(val).format("YYYY年MM月DD日");
     })
    
-    // iview的吸附效果和点击去顶部
-    import iView from 'iview';
-    import 'iview/dist/styles/iview.css';
-    Vue.use(iView);
+
     
-    // 放大镜
-    import ProductZoomer from 'vue-product-zoomer';
-    Vue.use(ProductZoomer);
+  
 
 
 //定义路由的规则
@@ -126,8 +169,7 @@ let routes =[
   // 默认首页也打开index 使用重定项
   {
     path:'/',
-    // component:Index,
-  //   //重定项解析到index 直接修改路由地址
+    //重定项解析到index 直接修改路由地址
     redirect:'/index'
   },
   //首页规则
@@ -143,7 +185,17 @@ let routes =[
   //购物车
   {
   path:'/cart',
-  component:shoppingCart,
+  component:ShoppingCart,
+  },
+  // 登录页面的路由
+  {
+    path:'/login',
+    component:Login,
+  },
+   // 填写订单的路由
+   {
+    path:'/order',
+    component:FillOrder,
   },
 ]
 //实例化路由对象
@@ -153,23 +205,28 @@ let router = new VueRouter({
 
 //增加导航守卫(路由守卫)
 router.beforeEach((to,from,next)=>{
-// 如果访问的是 order页面判断登录
-if(to.path.indexOf('/order/')!=-1){
-  // 调用接口
-  axios.get("/site/account/islogin").then(response=>{
-    // console(response);
-    //登录了才可以继续访问
-    if(response.data.code!='nologin'){
-      // 直接放走
-      next();
+      // 每次过来都保存一下来时的地址
+      // 提交载荷 保存数据
+  store.commit('saveFromPath',from.path);
+    // !=-1 说明包含了 /order/
+    // 如果访问的是 order页面判断登录
+    if(to.path.indexOf('/order/')!=-1){
+      // 调用接口
+      axios.get("/site/account/islogin").then(response=>{
+        // alert('1');
+        // console(response);
+        //登录了才可以继续访问
+        if(response.data.code!='nologin'){
+          // 直接放走
+          next();
+        }else{
+          // 没有登录打到登录页面
+          next('/login')
+        }
+      })
     }else{
-      // 没有登录打到登录页面
-      next('/login')
+      next();
     }
-  })
-}else{
-  next();
-}
 })
 
 
@@ -181,5 +238,19 @@ new Vue({
   // 路由对象
   router,
   // 仓库对象 属性的名字 叫做store
-  store
+  store,
+  beforeCreate(){
+    // console.log('你爷爷被创建了');
+    axios.get("/site/account/islogin").then(response=>{
+      // console.log(response);
+      if(response.data.code=='logined'){
+        // 登陆成功了
+        this.$message.error('大哥你好,你登录成功');
+
+        store.state.isLogin = true;
+      }else{
+        // 没有登陆
+      }
+    })
+  },
 }).$mount('#app')

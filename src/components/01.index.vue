@@ -117,11 +117,7 @@
 </template>
 
 <script>
-// 导入axios
-import axios from "axios";
 
-// 引入 moment.js
-// import moment from "moment";
 
 export default {
     // 设置名字
@@ -139,8 +135,8 @@ export default {
     beforeCreate() {},
     created() {
         //网络数据获取
-        axios
-            .get("http://47.106.148.205:8899/site/goods/gettopdata/goods")
+        this.$axios
+            .get("/site/goods/gettopdata/goods")
 
             .then(response => {
                 // 把获取到的数据 设置给 当前这个组件的 data属性
@@ -153,20 +149,14 @@ export default {
             });
 
             //底部的分类数据
-            axios
-            .get("http://47.106.148.205:8899/site/goods/getgoodsgroup")
+            this.$axios
+            .get("/site/goods/getgoodsgroup")
             .then(response=>{
                 console.log(response);
                 this.groupData = response.data.message;
             })
     },
-    // 过滤器
-    // filters: {
-    //     //   过滤日期
-    //     filterDate(val) {
-    //         return moment(val).format("YYYY年MM月DD日");
-    //     }
-    // }
+   
 };
 </script>
 

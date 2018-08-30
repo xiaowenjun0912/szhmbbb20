@@ -1,5 +1,8 @@
 <template>
-    <div>
+    <div v-loading="loading"
+        element-loading-text="拼命加载中"
+        element-loading-spinner="el=icon-loading"
+        element-loading-background="yellowgreen">
          <div class="section">
             <div class="location">
                 <span>当前位置：</span>
@@ -111,10 +114,11 @@
                     <div class="cart-foot clearfix">
                         <div class="right-box">
                             <router-link to="/index">
-                                <button class="button">
+                            <button class="button">
                                     继续购物
                                 </button>
                             </router-link>
+                                
                             <button class="submit" @click="checkAndSubmit">立即结算</button>
                         </div>
                     </div>
@@ -125,8 +129,6 @@
     </div>
 </template>
 <script>
-// 导入axios
-import axios from 'axios';
 
 export default {
     // 在开发者工具中国看到组件的名字
@@ -134,6 +136,7 @@ export default {
     data:function(){
         return{
             message:[],
+            loading:false,
         }
     },
     // 生命周期函数(钩子函数)
@@ -151,9 +154,12 @@ export default {
         // 去掉最后多余的逗号 -1代表最后一个不要
         ids = ids.slice(0,-1);
         console.log(ids);
+            this.loading = true;
+
         //调用接口获取数
-        axios.get(`http://47.106.148.205:8899/site/comment/getshopcargoods/${ids}`)
+        this.$axios.get(`/site/comment/getshopcargoods/${ids}`)
         .then(response=>{
+            this.loading = false;
             console.log(response);
             // 自己拼接
             response.data.message.forEach(v => {
@@ -204,28 +210,26 @@ export default {
     // 方法
     methods:{
         numChange(num, id) {
-      //   console.log(num,id);
-      // 调用仓库的方法 (提交载荷)
-      this.$store.commit("updateGoodsNum", {
-        goodId: id,
-        goodNum: num
-      });
-    },
+        //   console.log(num,id);
+        // 调用仓库的方法 (提交载荷)
+        this.$store.commit("updateGoodsNum", {
+            goodId: id,
+            goodNum: num
+        });
+        },
        // 删除数据
-    delOne(id) {
-      //   console.log(id);
-      // 提交载荷 这里是删除 Vuex中的
-      this.$store.commit("deleteGoods", id);
-      // 页面中的 并没有删除
-      // this.message
-      this.message.forEach((v, index) => {
-        if (v.id == id) {
-          this.message.splice(index, 1);
-        }
-      });
-    },
-    
-
+        delOne(id) {
+        //   console.log(id);
+        // 提交载荷 这里是删除 Vuex中的
+        this.$store.commit("deleteGoods", id);
+        // 页面中的 并没有删除
+        // this.message
+        this.message.forEach((v, index) => {
+            if (v.id == id) {
+            this.message.splice(index, 1);
+            }
+        });
+        },
         // 验证登录 跳转登录页
         checkAndSubmit(){
             // 判断是否选择商品
@@ -233,18 +237,18 @@ export default {
                 this.$message.error('请买点商品再结算');
                 return;
             }
-            // 到这里说明选了东西 直接去订单页并且带上ids格式
+            // 到这里 直接准备去订单页面
             // 获取选中的id
-            let ids ="";
+            let ids = '';
             this.message.forEach(v=>{
-                // 选中的才累加
+                // 选中的 才累加
                 if(v.selected==true){
                     ids+=v.id;
                     ids+=",";
                 }
             })
             // 去掉最后的
-            ids = ids.splice(0,-1);
+            ids =ids.slice(0,-1);
             this.$router.push(`/order/${ids}`);
         }
     }
