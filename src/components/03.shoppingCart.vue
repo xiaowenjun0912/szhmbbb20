@@ -1,8 +1,10 @@
 <template>
-    <div v-loading="loading"
+    <div>
+            <!-- v-loading="loading"
         element-loading-text="拼命加载中"
         element-loading-spinner="el=icon-loading"
-        element-loading-background="yellowgreen">
+        element-loading-background="yellowgreen" -->
+
          <div class="section">
             <div class="location">
                 <span>当前位置：</span>
@@ -91,7 +93,7 @@
                                                 传送门
                                             在后面增加自定义的参数
                                          -->
-                                        <el-input-number size="mini" :min='0' v-model="item.buycount" @change="numChange($event,item.id)"></el-input-number>
+                                        <el-input-number size="mini" :min='0' :max="item.max" v-model="item.buycount" @change="numChange($event,item.id)"></el-input-number>
                                     </td>
                                     <td>{{item.buycount*item.sell_price}}</td>
                                     <td>
@@ -135,9 +137,8 @@ export default {
     name:"shoppingCart",
     data:function(){
         return{
-            message:[],
-            loading:false,
-        }
+            message:[]
+        };
     },
     // 生命周期函数(钩子函数)
     created() {
@@ -154,19 +155,23 @@ export default {
         // 去掉最后多余的逗号 -1代表最后一个不要
         ids = ids.slice(0,-1);
         console.log(ids);
-            this.loading = true;
+            // this.loading = true;
 
         //调用接口获取数
         this.$axios.get(`/site/comment/getshopcargoods/${ids}`)
         .then(response=>{
-            this.loading = false;
-            console.log(response);
+            // this.loading = false;
+            // console.log(response);
             // 自己拼接
             response.data.message.forEach(v => {
                 //获取Vuex中的 id 对应的值
-                v.buycount =cartDate[v.id];
+                v.buycount = cartDate[v.id];
                 // 购物车的商品默认被选中
                 v.selected = true;
+                this.$axios.get(`/site/goods/getgoodsinfo/${v.id}`).then(resSon=>{
+                    console.log(resSon);
+                    v.max = resSon.data.message.goodsinfo.stock_quantity;
+                })
             });
             // 再赋值给message
             this.message = response.data.message;
@@ -211,6 +216,13 @@ export default {
     methods:{
         numChange(num, id) {
         //   console.log(num,id);
+        this.message.forEach(v=>{
+            if(v.id==id){
+                if(num>v.max){
+                    num = v.max;
+                }
+            }
+        })
         // 调用仓库的方法 (提交载荷)
         this.$store.commit("updateGoodsNum", {
             goodId: id,

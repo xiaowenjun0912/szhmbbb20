@@ -33,9 +33,11 @@
                         </span>
                         <!-- 已经登录 -->
                         <span v-show="$store.state.isLogin==true">
-                            <a href="" class="">
-                                    会员中心
-                            </a>
+                            <!-- <a href="" class=""> -->
+                                <router-link to="/vipCenter"> 会员中心</router-link>
+                                   
+
+                            <!-- </a> -->
                             <strong>
                                         |
                             </strong>

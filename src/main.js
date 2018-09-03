@@ -1,26 +1,29 @@
 // 导入vue
 import Vue from 'vue'
-
 //导入路由
 import VueRouter from 'vue-router'
-
 //导入App根组件(最外面的组件)
 import App from './App.vue'
-
 //导入首页的组件
 import Index from './components/01.index.vue';
-
 // 导入我们的商品详情页面
 import Detail from './components/02.productDetail.vue';
-
 // 导入购物车的组件页面
 import ShoppingCart from './components/03.shoppingCart.vue';
-
 // 导入登录页面的组件
 import Login from './components/04.login.vue';
-
 // 导入填写订单页面的组件
 import FillOrder from './components/05.fillOrder.vue';
+// 导入提交订单页面的组件
+import PayOrder from './components/06.payOrder.vue';
+// 导入提交订单页面的组件
+import PaySuccess from './components/07.paySuccess.vue';
+//导入会员中心页面
+import VipCenter from './components/08.vipCenter.vue'; 
+// 导入订单列表页面
+import OrderList from './components/09.orderList.vue';
+// 
+import OrderDetail from './components/10.orderDetail.vue';
 
 // 导入 elementui
 import ElementUI from 'element-ui';
@@ -155,8 +158,17 @@ Vue.use(Vuelazyload,{
 
     // 注册一个全局过滤器
     import moment from 'moment';
-    Vue.filter('filterDate',function(val){
-          return moment(val).format("YYYY年MM月DD日");
+    // 注册 这个过滤器 只能格式化固定的内容
+    // 可以接收参数
+    Vue.filter('filterDate',function(val,formatStr){
+      console.log(formatStr);
+      // 如果你传入了格式化字符串 就是传入的
+      if(formatStr!=undefined){
+        return moment(val).format(formatStr);
+      }else{
+        // 没有传入这个格式化字符串 就是默认的
+        return moment(val).format("YYYY年MM月DD日");
+      }
     })
    
 
@@ -194,9 +206,58 @@ let routes =[
   },
    // 填写订单的路由
    {
-    path:'/order',
+    path:'/order/:ids',
     component:FillOrder,
+    // 路由元信息 可以随意加 
+    meta: {
+      checkLogin: true
+      // panduan:true
+    }
   },
+    // 订单支付
+  {
+    path: '/payOrder/:orderid',
+    component: PayOrder,
+    // 路由元信息 可以随意加  订单支付页 也必须登陆才可以访问
+    meta: {
+      checkLogin: true
+    }
+  },
+  // 支付成功
+      {
+        path: '/paySuccess',
+        component: PaySuccess,
+        // 路由元信息 可以随意加  订单支付页 也必须登陆才可以访问
+        meta: {
+          checkLogin: true
+        }
+      },
+      // 会员中心
+      {
+        path: '/vipCenter',
+        component: VipCenter,
+        // 路由元信息 可以随意加  订单支付页 也必须登陆才可以访问
+        meta: {
+          checkLogin: true  
+        }
+      },
+      // 订单列表页面
+          {
+            path: '/orderList',
+            component: OrderList,
+            // 路由元信息 可以随意加  订单支付页 也必须登陆才可以访问
+            meta: {
+              checkLogin: true  
+            }
+          },
+          {
+            path: '/orderDetail/:id',
+            component: OrderDetail,
+            // 路由元信息 可以随意加  订单支付页 也必须登陆才可以访问
+            meta: {
+              checkLogin: true  
+            }
+          },
 ]
 //实例化路由对象
 let router = new VueRouter({
@@ -208,7 +269,10 @@ router.beforeEach((to,from,next)=>{
       // 每次过来都保存一下来时的地址
       // 提交载荷 保存数据
   store.commit('saveFromPath',from.path);
-    // !=-1 说明包含了 /order/
+    
+  
+  
+  // !=-1 说明包含了 /order/
     // 如果访问的是 order页面判断登录
     if(to.path.indexOf('/order/')!=-1){
       // 调用接口
@@ -223,6 +287,7 @@ router.beforeEach((to,from,next)=>{
           // 没有登录打到登录页面
           next('/login')
         }
+    
       })
     }else{
       next();
